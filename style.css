@@ -25,21 +25,37 @@ header a{
     justify-content: space-between;
     flex-wrap: nowrap;
 }
-.animal{
+.animal, .human{
     width: 24%;
 /*    border: 1px solid red;*/
     height: 30vh;
     text-align: center;
+    position: relative;
 }
 .img-block{
     width: 100%;
     height: 80%;
 }
-.animal img{
+.animal img, .human img{
     width: 100%;
     height: 100%;
+    cursor: pointer
 }
 .titel {
-    font-size: 16px;
+    font-size: 18px;
     text-align: center;
+    margin: 25px 0;
+}
+
+.animal h1, .human h1{
+    font-size: 14px;
+}
+.modal-window{
+    position: absolute;
+    padding: 30px 50px 30px 30px;
+    background: #fcf6e1;
+    border: 1px solid #af9c54;
+    border-radius: 5px;
+    top: 0;
+    right: 0;
 }
