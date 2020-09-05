@@ -10,7 +10,7 @@ class Animal {
         this.age = data.age;
         this.img = data.img
     }
-    voice() {
+    getVoice() {
         return this.voice
     }
 }

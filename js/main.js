@@ -135,7 +135,7 @@ const zooWorkers = [
 const zooAnimals = [
     animalFuctory.create('herbivorous', {
         price: 11000,
-        species: 'Elephant',
+        species: 'elephant',
         voice: 'ffFFfff',
         gender: 'man',
         age: 26,
@@ -194,40 +194,132 @@ const HTMLoutput = (function () {
 
     function hoverEvent() {
         document.querySelector('.animal-container').addEventListener('mouseover', e => {
-            //          if(e.target.getAttribute('data-animal')){
-            //            console.log(data[0][e.target.getAttribute('data-animal')].voice)
-            //          }
-            if (e.target.classList.contains('animal')) {
-                //                console.log(data[0][e.target.getAttribute('data-animal')].voice)
-                showModalWindow(data[0][e.target.getAttribute('data-animal')].voice, e.target)
+            if (e.target.getAttribute('data-animal')) {
+                let text = data[0][e.target.getAttribute('data-animal')].getVoice()
+                let mw = e.target.parentElement.nextElementSibling;
+                showModalWindow(text, mw)
+            }
+        })
+        document.querySelector('.human-container').addEventListener('mouseover', e => {
+            if (e.target.getAttribute('data-human')) {
+                let text = data[1][e.target.getAttribute('data-human')].sayHi()
+                let mw = e.target.parentElement.nextElementSibling;
+
+                showModalWindow(text, mw)
             }
         })
     }
 
+    function findMW(text, index, key) {
+        let elem;
+        if (key == 'human') {
+            for (let img of domHumanImg) {
+                if (img.getAttribute('data-human') == index) elem = img
+            }
+        } else if (key == 'animal') {
+            for (let img of domAnimalImg) {
+                if (img.getAttribute('data-animal') == index) elem = img
+            }
+        }
+        elem = elem.parentElement.nextElementSibling;
+        showModalWindow(text, elem)
+    }
+
     function showModalWindow(text, elem) {
-        console.log(text, elem.querySelector('.modal-window'))
-        elem.querySelector('.modal-window').style.display = 'block';
-        elem.querySelector('.modal-window').textContent = text + '...';
+        elem.style.display = 'block';
+        elem.textContent = text + '...';
+        setTimeout(() => {
+            hideModalWindow(elem)
+        }, 3000)
+    }
+
+    function hideModalWindow(elem) {
+        elem.style.display = 'none'
     }
 
     function fillHTML() {
         data[0].forEach((elem, i) => {
             domAnimalNames[i].textContent = elem.species;
             domAnimalImg[i].src = elem.img;
-            domAnimal[i].setAttribute('data-animal', i);
+            domAnimalImg[i].setAttribute('data-animal', i);
         })
         data[1].forEach((elem, i) => {
             domHumanNames[i].textContent = elem.name;
             domHumanProfession[i].textContent = elem.profession;
-            domHumanImg[i].src = elem.img
+            domHumanImg[i].src = elem.img;
+            domHumanImg[i].setAttribute('data-human', i);
+
         })
     }
     return {
+        findMW: findMW,
         setData: setData,
         fillHTML: fillHTML
     }
 })();
 
+//MEDIATOR//
+class ZooMediator {
+    constructor() {
+        this.workers;
+        this.animals;
+    }
+    register(animals, workers) {
+        this.workers = workers;
+        this.animals = animals;
+    }
+    setHTML() {
+        HTMLoutput.setData([this.animals, this.workers])
+        HTMLoutput.fillHTML();
+    }
+    resolveProblem(type, animal) {
+        let problemTypes = {
+            isIll: 'nurse',
+            isEscape: 'hunter',
+            isHungry: 'worker',
+            archiveProblem: 'librarian'
+        }
+        let workPerson;
+        let i;
+        this.workers.forEach((person, index) => {
+            if (person.profession == problemTypes[type]) {
+                let text = person.startDoing(type, animal);
+                workPerson = person
+                i = index
+                HTMLoutput.findMW(text, index, 'human')
 
-HTMLoutput.setData([zooAnimals, zooWorkers])
-HTMLoutput.fillHTML();
+            }
+        })
+        setTimeout(() => {
+            let text = workPerson.endDoing()
+            HTMLoutput.findMW(text, i, 'human')
+            this.animals.forEach((a, index) => {
+                if (a.species == animal) {
+                    let text = a.getVoice()
+                    HTMLoutput.findMW(text, index, 'animal')
+                }
+            })
+        }, workPerson.workTime)
+    }
+}
+
+
+const zooMediator = new ZooMediator();
+zooMediator.register(zooAnimals, zooWorkers)
+zooMediator.setHTML();
+zooSimulator();
+
+//simulates random behavior in a zoo, just for example
+function zooSimulator() {
+    let animalSpecies = zooAnimals.map(a => a.species)
+    console.log(animalSpecies)
+    let problemsKey = ['isIll', 'isEscape', 'isHungry', 'archiveProblem']
+    function randomInt(min, max) {
+        let rand = min + Math.random() * (max + 1 - min);
+        console.log(rand)
+        return Math.floor(rand);
+    }
+    setInterval(()=>{
+        zooMediator.resolveProblem(problemsKey[randomInt(0, 3)], animalSpecies[randomInt(0,3)])}
+                ,5000)
+}

@@ -27,7 +27,6 @@ header a{
 }
 .animal, .human{
     width: 24%;
-/*    border: 1px solid red;*/
     height: 30vh;
     text-align: center;
     position: relative;
